@@ -13,8 +13,19 @@ export default function Modal({ children, onClose }: ModalProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
+
+    // Додаємо слухач Escape
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    // === 🔒 Вимикаємо прокрутку під час відкриття модалки ===
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // При розмонтуванні: прибрати слухач і повернути прокрутку
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
   }, [onClose]);
 
   return createPortal(

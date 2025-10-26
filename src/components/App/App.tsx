@@ -21,18 +21,18 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery] = useDebounce(searchQuery, 300);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1); // 🔹 Починаємо з 1, не з 0
   const perPage = 12;
 
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setCurrentPage(0);
+    setCurrentPage(1); // 🔹 При новому пошуку повертаємося на 1 сторінку
   }, [debouncedQuery]);
 
   const { data, isLoading, error } = useQuery<GetNoteResponse>({
     queryKey: ['notes', debouncedQuery, currentPage],
-    queryFn: () => fetchNotes(debouncedQuery, currentPage + 1, perPage),
+    queryFn: () => fetchNotes(debouncedQuery, currentPage, perPage), // 🔹 Без +1
     placeholderData: keepPreviousData,
   });
 
@@ -53,8 +53,8 @@ export default function App() {
         {data && data.totalPages > 1 && (
           <Pagination
             pageCount={data.totalPages}
-            currentPage={currentPage}
-            onPageChange={({ selected }) => setCurrentPage(selected)}
+            currentPage={currentPage - 1} // 🔹 Якщо компонент Pagination 0-based
+            onPageChange={({ selected }) => setCurrentPage(selected + 1)} // 🔹 Узгоджуємо
           />
         )}
 
@@ -75,7 +75,10 @@ export default function App() {
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm onCancel={() => setIsModalOpen(false)} onSuccess={() => setCurrentPage(0)} />
+          <NoteForm
+            onCancel={() => setIsModalOpen(false)}
+            onSuccess={() => setCurrentPage(1)} // 🔹 Після створення повертаємо на 1 сторінку
+          />
         </Modal>
       )}
     </div>
