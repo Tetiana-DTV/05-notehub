@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import {
   useQuery,
-  useMutation,
-  useQueryClient,
   keepPreviousData,
 } from '@tanstack/react-query';
 import NoteList from '../NoteList/NoteList';
 import SearchBox from '../SearchBox/SearchBox';
 import css from './App.module.css';
-import { fetchNotes, deleteNote } from '../../services/noteService';
+
+import { fetchNotes } from '../../services/noteService';
+
 import { useDebounce } from 'use-debounce';
 import type { GetNoteResponse } from '../../services/noteService';
 import Pagination from '../Pagination/Pagination';
@@ -24,7 +24,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1); // 🔹 Починаємо з 1, не з 0
   const perPage = 12;
 
-  const queryClient = useQueryClient();
+  
 
   useEffect(() => {
     setCurrentPage(1); // 🔹 При новому пошуку повертаємося на 1 сторінку
@@ -36,14 +36,7 @@ export default function App() {
     placeholderData: keepPreviousData,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['notes', debouncedQuery, currentPage],
-      });
-    },
-  });
+
 
   return (
     <div className={css.app}>
@@ -66,12 +59,8 @@ export default function App() {
       {isLoading && <Loader />}
       {error && <ErrorMessage />}
 
-      {data && (
-        <NoteList
-          notes={data.notes}
-          onDelete={(id) => deleteMutation.mutate(id)}
-        />
-      )}
+      {data && <NoteList notes={data.notes} />}
+
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>

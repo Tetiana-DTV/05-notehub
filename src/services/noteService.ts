@@ -12,7 +12,9 @@ export async function fetchNotes(
   page: number = 1,
   perPage: number = 10
 ): Promise<GetNoteResponse> {
-  const params: Record<string, any> = { page, perPage };
+
+  const params: Record<string, string | number> = { page, perPage };
+
   if (query) params.search = query;
 
   const response = await api.get<GetNoteResponse>('/notes', { params });
